@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6D27EF6D-3205-4CE8-ACF7-F513AD1035ED}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Spreads.Aeron</RootNamespace>
+    <AssemblyName>Spreads.Aeron</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;TYPED_REF</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;TYPED_REF</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BitUtil.cs" />
+    <Compile Include="ErrorHandler.cs" />
+    <Compile Include="LogBuffers.cs" />
+    <Compile Include="Logbuffer\BlockHandler.cs" />
+    <Compile Include="Logbuffer\BufferClaim.cs" />
+    <Compile Include="Logbuffer\ControlledFragmentHandler.cs" />
+    <Compile Include="Logbuffer\FileBlockHandler.cs" />
+    <Compile Include="Logbuffer\FragmentHandler.cs" />
+    <Compile Include="Logbuffer\FrameDescriptor.cs" />
+    <Compile Include="Logbuffer\Header.cs" />
+    <Compile Include="Logbuffer\HeaderWriter.cs" />
+    <Compile Include="Logbuffer\LogBufferDescriptor.cs" />
+    <Compile Include="Logbuffer\LogBufferPartition.cs" />
+    <Compile Include="Logbuffer\LogBufferUnblocker.cs" />
+    <Compile Include="Logbuffer\TermAppender.cs" />
+    <Compile Include="Logbuffer\TermBlockScanner.cs" />
+    <Compile Include="Logbuffer\TermGapScanner.cs" />
+    <Compile Include="Logbuffer\TermReader.cs" />
+    <Compile Include="Logbuffer\TermRebuilder.cs" />
+    <Compile Include="Logbuffer\TermScanner.cs" />
+    <Compile Include="Logbuffer\TermUnblocker.cs" />
+    <Compile Include="OnAppendHandler.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\DataHeaderFlyweight.cs" />
+    <Compile Include="Protocol\HeaderFlightweight.cs" />
+    <Compile Include="Serialization\DirectBuffer.cs" />
+    <Compile Include="Serialization\DirectFile.cs" />
+    <Compile Include="Serialization\FixedBuffer.cs" />
+    <Compile Include="Serialization\IBinaryConverter.cs" />
+    <Compile Include="Serialization\IDirectBuffer.cs" />
+    <Compile Include="Serialization\IDirectBufferExtensions.cs" />
+    <Compile Include="Serialization\SafeBufferAccessor.cs" />
+    <Compile Include="Serialization\SafeBufferStream.cs" />
+    <Compile Include="Serialization\TypeHelper.cs" />
+    <Compile Include="StringExtensions.cs" />
+    <Compile Include="UUID.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
