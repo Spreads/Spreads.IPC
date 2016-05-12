@@ -1,5 +1,9 @@
+**Status**: This is a code drop for LogBuffers port from Aeron that is used in Spreads. A full .NET Aeron client
+[will be published very soon](https://github.com/real-logic/Aeron/issues/225), so there will be no activity in this repo.
+
+
 Aeron.NET
-==========
+----------
 
 .NET port of [Aeron](https://github.com/real-logic/Aeron) client.
 
