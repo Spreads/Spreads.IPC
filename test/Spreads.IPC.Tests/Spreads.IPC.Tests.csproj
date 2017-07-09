@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp1.1</TargetFrameworks>
+    <!--<RuntimeIdentifiers>win7-x64;win7-x86;osx.10.10-x64;osx.10.11-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.23-x64;opensuse.13.2-x64</RuntimeIdentifiers>
+    <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net451' ">win7-x86</RuntimeIdentifier>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">1.0.3</RuntimeFrameworkVersion>
+    -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AssemblyName>Spreads.IPC.Tests</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <AssemblyOriginatorKeyFile>../../tools/SpreadsKey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>Spreads.IPC.Tests</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Spreads.IPC\Spreads.IPC.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>
