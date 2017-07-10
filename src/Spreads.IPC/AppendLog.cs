@@ -7,6 +7,7 @@ using Spreads.IPC.Protocol;
 using Spreads.Utils;
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,7 +32,7 @@ namespace Spreads.IPC
         event OnAppendHandler OnAppend;
     }
 
-    internal sealed class AppendLog : IAppendLog
+    public sealed class AppendLog : IAppendLog
     {
         private readonly LogBuffers _logBuffers;
 
@@ -54,14 +55,9 @@ namespace Spreads.IPC
         private readonly int _initialTermId;
         private readonly int _positionBitsToShift;
 
-        private readonly Task _poller;
+        private Task _poller;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private int _termLengthMask;
-
-        //static AppendLog() {
-        //    // even if process dies not gracefully and is reused, the chance for collision is 1/short.MaxValue
-        //    _counter = (new System.Random()).Next(0, short.MaxValue) << 16;
-        //}
 
         public AppendLog(string filepath, int bufferSizeMb = 100)
         {
@@ -79,7 +75,6 @@ namespace Spreads.IPC
             _termLengthMask = _logBuffers.TermLength - 1;
             _positionBitsToShift = IntUtil.NumberOfTrailingZeros(_logBuffers.TermLength);
             _initialTermId = LogBufferDescriptor.InitialTermId(_logBuffers.LogMetaData);
-            //var defaultHeader = DefaultFrameHeader(_logBuffers.LogMetaData);
             var defaultHeader = DataHeaderFlyweight.CreateDefaultHeader(0, 0, _initialTermId);
             var smHeader = new DataHeader
             {
@@ -97,41 +92,53 @@ namespace Spreads.IPC
             _dataHeaderWriter = new HeaderWriter(defaultHeader);
             _smHeaderWriter = new HeaderWriter(smHeader);
 
+            // Send status message every 100 milliseconds
+            _smTimer = new Timer(TimerCallback, this, 0, 100);
+        }
+
+        public void StartPolling()
+        {
             _subscriberPosition = Position;
             Trace.Assert(_subscriberPosition == Position);
 
             _poller = Task.Factory.StartNew(() =>
-            {
-                try
                 {
-                }
-                finally
-                {
-                    var sw = new SpinWait();
-                    while (!_cts.IsCancellationRequested)
+                    try { }
+                    finally
                     {
-                        var fragments = Poll();
-                        if (fragments > 0)
+                        while (!_cts.IsCancellationRequested)
                         {
-                            sw.Reset();
+                            // NB catch exception outside spin loop and restart
+                            // the loop - this give substantial performance gain
+                            // due to inlining of the Read method
+                            try
+                            {
+                                var sw = new SpinWait();
+                                while (!_cts.IsCancellationRequested)
+                                {
+                                    var fragments = Poll();
+                                    if (fragments > 0)
+                                    {
+                                        sw.Reset();
+                                    }
+                                    else
+                                    {
+                                        sw.SpinOnce();
+                                    }
+                                }
+                            }
+                            catch (Exception t)
+                            {
+                                OnError?.Invoke(t);
+                            }
                         }
-                        else
-                        {
-                            sw.SpinOnce();
-                        }
-                        // TODO try waithandle as in IpcLongIncrementListener
-                        //Thread.SpinWait(0);
                     }
-                }
-            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)
-            .ContinueWith(task =>
-            {
-                Console.WriteLine("AppendLog Poll should never throw exceptions" + Environment.NewLine + task.Exception);
-                Environment.FailFast("AppendLog Poll should never throw exceptions", task.Exception);
-            }, TaskContinuationOptions.OnlyOnFaulted);
-
-            // Send status message every 100 milliseconds
-            _smTimer = new Timer(TimerCallback, this, 0, 100);
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                .ContinueWith(task =>
+                {
+                    Console.WriteLine("AppendLog Poll should never throw exceptions" + Environment.NewLine + task.Exception);
+                    Environment.FailFast("AppendLog Poll should never throw exceptions", task.Exception);
+                }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         /// <summary>
@@ -148,6 +155,7 @@ namespace Spreads.IPC
 
         public event ErrorHandler OnError;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long Claim(int length, out BufferClaim claim)
         {
             while (true)
@@ -178,6 +186,7 @@ namespace Spreads.IPC
         /// <returns> the current position to which the publication has advanced for this stream. </returns>
         public long Position
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 long rawTail = _termAppenders[LogBufferDescriptor.ActivePartitionIndex(_logBuffers.LogMetaData)].RawTailVolatile;
@@ -186,6 +195,7 @@ namespace Spreads.IPC
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long NewPosition(int index, int currentTail, long position, long result)
         {
             long newPosition = TermAppender.TRIPPED;
@@ -202,22 +212,31 @@ namespace Spreads.IPC
                 //_termAppenders[nextNextIndex].StatusOrdered(LogBufferDescriptor.NEEDS_CLEANING);
                 //ActivePartitionIndex(_logBuffers.LogMetaData, nextIndex);
                 // TODO why we rotate log here and not in term appender?
-                LogBufferDescriptor.RotateLog(_logBuffers.Partitions, _logBuffers.LogMetaData, index, TermAppender.TermId(result) + 1);
-                ThreadPool.QueueUserWorkItem(CleanerCallback, this);
+                RotateAndClean(index, result);
             }
             return newPosition;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void RotateAndClean(int index, long result)
+        {
+            LogBufferDescriptor.RotateLog(_logBuffers.Partitions, _logBuffers.LogMetaData, index,
+                TermAppender.TermId(result) + 1);
+            ThreadPool.QueueUserWorkItem(CleanerCallback, this);
         }
 
         /// <summary>
         /// Poll messages starting from _subscriberPosition and invoke OnAppendHandlerOld event
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long Poll()
         {
             var subscriberIndex = LogBufferDescriptor.IndexByPosition(_subscriberPosition, _positionBitsToShift);
             int termOffset = (int)_subscriberPosition & _termLengthMask;
             var termBuffer = _logBuffers.Buffers[subscriberIndex];
 
-            long outcome = TermReader.Read(termBuffer, termOffset, OnAppend, 10, OnError);
+            // ,ErrorHandler errorHandler //OnError
+            long outcome = TermReader.Read(termBuffer, termOffset, OnAppend, 10);
 
             UpdatePosition(termOffset, TermReader.Offset(outcome));
             return outcome & 0xFFFFFFFFL;
@@ -228,11 +247,13 @@ namespace Spreads.IPC
         /// </summary>
         /// <param name="offsetBefore"></param>
         /// <param name="offsetAfter"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void UpdatePosition(int offsetBefore, int offsetAfter)
         {
             _subscriberPosition = _subscriberPosition + (offsetAfter - offsetBefore);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append<T>(T message)
         {
             throw new NotImplementedException();
@@ -250,6 +271,7 @@ namespace Spreads.IPC
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ClearLogBuffer(object state)
         {
             try
@@ -270,6 +292,7 @@ namespace Spreads.IPC
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SendStatusMessage(object state)
         {
             try

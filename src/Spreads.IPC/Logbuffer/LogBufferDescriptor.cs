@@ -6,6 +6,7 @@ using Spreads.Buffers;
 using Spreads.IPC.Protocol;
 using Spreads.Utils;
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 
 namespace Spreads.IPC.Logbuffer
@@ -219,7 +220,7 @@ namespace Spreads.IPC.Logbuffer
         /// </summary>
         /// <param name="buffer"> to be checked. </param>
         /// <exception cref="InvalidOperationException"> if the buffer is not as expected. </exception>
-        public static void CheckMetaDataBuffer(DirectBuffer buffer)
+        public static void CheckMetaDataBuffer(Buffer<byte> buffer)
         {
             checked
             {
@@ -239,7 +240,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @return the value of the initial Term id used for this log.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int InitialTermId(DirectBuffer logMetaDataBuffer)
         {
             return logMetaDataBuffer.ReadInt32(LOG_INITIAL_TERM_ID_OFFSET);
@@ -252,7 +253,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @param initialTermId     value to be set.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void InitialTermId(DirectBuffer logMetaDataBuffer, int initialTermId)
         {
             logMetaDataBuffer.WriteInt32(LOG_INITIAL_TERM_ID_OFFSET, initialTermId);
@@ -264,7 +265,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @return the value of the MTU length used for this log.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int MtuLength(DirectBuffer logMetaDataBuffer)
         {
             return logMetaDataBuffer.ReadInt32(LOG_MTU_LENGTH_OFFSET);
@@ -276,7 +277,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @param mtuLength         value to be set.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MtuLength(DirectBuffer logMetaDataBuffer, int mtuLength)
         {
             logMetaDataBuffer.WriteInt32(LOG_MTU_LENGTH_OFFSET, mtuLength);
@@ -288,7 +289,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @return the value of the correlation ID used for this log.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long CorrelationId(DirectBuffer logMetaDataBuffer)
         {
             return logMetaDataBuffer.ReadInt64(LOG_CORRELATION_ID_OFFSET);
@@ -300,7 +301,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @param id                value to be set.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CorrelationId(DirectBuffer logMetaDataBuffer, long id)
         {
             logMetaDataBuffer.WriteInt64(LOG_CORRELATION_ID_OFFSET, id);
@@ -312,7 +313,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @return the value of time of last SM
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long TimeOfLastStatusMessage(DirectBuffer logMetaDataBuffer)
         {
             return logMetaDataBuffer.VolatileReadInt64(LOG_TIME_OF_LAST_SM_OFFSET);
@@ -324,7 +325,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the meta data.
          * @param timeInMillis      value of the time of last SM in {@link System#currentTimeMillis()}
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TimeOfLastStatusMessage(DirectBuffer logMetaDataBuffer, long timeInMillis)
         {
             logMetaDataBuffer.VolatileWriteInt64(LOG_TIME_OF_LAST_SM_OFFSET, timeInMillis);
@@ -469,7 +470,7 @@ namespace Spreads.IPC.Logbuffer
          * @param initialTermId       the initial term id that this stream started on
          * @return the term id according to the position
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeTermIdFromPosition(long position, int positionBitsToShift, int initialTermId)
         {
             return ((int)((long)((ulong)position >> positionBitsToShift)) + initialTermId);
@@ -482,7 +483,7 @@ namespace Spreads.IPC.Logbuffer
          * @param positionBitsToShift number of times to right shift the position
          * @return the offset within the term that represents the position
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeTermOffsetFromPosition(long position, int positionBitsToShift)
         {
             long mask = (1L << positionBitsToShift) - 1L;
@@ -496,7 +497,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termLength on which to base the calculation.
          * @return the total length of the log file.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long ComputeLogLength(int termLength)
         {
             return
@@ -511,7 +512,7 @@ namespace Spreads.IPC.Logbuffer
          * @param logLength the total length of the log.
          * @return length of an individual term buffer in the log.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeTermLength(long logLength)
         {
             long metaDataSectionLength = (TERM_META_DATA_LENGTH * (long)PARTITION_COUNT) + LOG_META_DATA_LENGTH;
@@ -526,7 +527,7 @@ namespace Spreads.IPC.Logbuffer
          * @param defaultHeader     to be stored.
          * @throws IllegalArgumentException if the default header is larger than {@link #LOG_DEFAULT_FRAME_HEADER_MAX_LENGTH}
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void StoreDefaultFrameHeader(DirectBuffer logMetaDataBuffer, DirectBuffer defaultHeader)
         {
             if (defaultHeader.Length != DataHeaderFlyweight.HEADER_LENGTH)
@@ -546,10 +547,10 @@ namespace Spreads.IPC.Logbuffer
          * @param logMetaDataBuffer containing the raw bytes for the default frame header.
          * @return a buffer wrapping the raw bytes.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static DirectBuffer DefaultFrameHeader(DirectBuffer logMetaDataBuffer)
         {
-            return new DirectBuffer(DataHeaderFlyweight.HEADER_LENGTH, logMetaDataBuffer.Data + LOG_DEFAULT_FRAME_HEADER_OFFSET);
+            return DirectBuffer.CreateWithoutChecks(DataHeaderFlyweight.HEADER_LENGTH, logMetaDataBuffer.Data + LOG_DEFAULT_FRAME_HEADER_OFFSET);
         }
 
         /**
@@ -576,7 +577,7 @@ namespace Spreads.IPC.Logbuffer
          * @param activeIndex       current active index.
          * @param newTermId         to be used in the default headers.
          */
-
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void RotateLog(
             LogBufferPartition[] logPartitions,
             DirectBuffer logMetaDataBuffer,

@@ -25,7 +25,7 @@ namespace Spreads.IPC.Logbuffer
     /// space is not sufficiently large to accommodate the message about to be written.
     /// </summary>
 
-    public sealed class TermAppender
+    public struct TermAppender
     {
         private readonly DirectBuffer _termBuffer;
         private readonly DirectBuffer _metaDataBuffer;
@@ -58,9 +58,17 @@ namespace Spreads.IPC.Logbuffer
             this._metaDataBuffer = partition.MetaDataBuffer;
         }
 
-        public DirectBuffer TermBuffer => _termBuffer;
+        public DirectBuffer TermBuffer
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _termBuffer; }
+        }
 
-        public DirectBuffer MetaDataBuffer => _metaDataBuffer;
+        public DirectBuffer MetaDataBuffer
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _metaDataBuffer; }
+        }
 
         /// <summary>
         /// Get the raw value current tail value in a volatile memory ordering fashion.
@@ -72,12 +80,12 @@ namespace Spreads.IPC.Logbuffer
             get { return _metaDataBuffer.VolatileReadInt64(LogBufferDescriptor.TERM_TAIL_COUNTER_OFFSET); }
         }
 
-        /**
-         * Set the value for the tail counter.
-         *
-         * @param termId for the tail counter
-         */
 
+
+        /// <summary>
+        /// Set the value for the tail counter.
+        /// </summary>
+        /// <param name="termId">termId for the tail counter</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void TailTermId(int termId)
         {
@@ -90,6 +98,7 @@ namespace Spreads.IPC.Logbuffer
          * @param status to be set for the log buffer.
          */
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void StatusOrdered(int status)
         {
             _metaDataBuffer.VolatileWriteInt32(LogBufferDescriptor.TERM_STATUS_OFFSET, status);
@@ -103,6 +112,7 @@ namespace Spreads.IPC.Logbuffer
         /// <param name="bufferClaim"> to be updated with the claimed region. </param>
         /// <returns> the resulting offset of the term after the append on success otherwise <seealso cref="#TRIPPED"/> or <seealso cref="#FAILED"/>
         /// packed with the termId if a padding record was inserted at the end. </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe long Claim(HeaderWriter header, int length, out BufferClaim bufferClaim)
         {
             int frameLength = length + DataHeaderFlyweight.HEADER_LENGTH;
@@ -167,7 +177,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset value to be packed.
          * @return a long with both ints packed into it.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long Pack(int termId, int termOffset)
         {
             return ((long)termId << 32) | (termOffset & 0xFFFFFFFFL);
@@ -179,10 +189,10 @@ namespace Spreads.IPC.Logbuffer
          * @param result into which the termOffset value has been packed.
          * @return the termOffset after the append
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int TermOffset(long result)
         {
-            return (int)result;
+            return unchecked((int)result);
         }
 
         /**
@@ -191,12 +201,12 @@ namespace Spreads.IPC.Logbuffer
          * @param result into which the termId value has been packed.
          * @return the termId in which the append operation took place.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int TermId(long result)
         {
             return (int)((long)((ulong)result >> 32));
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long HandleEndOfLogCondition(
             DirectBuffer termBuffer,
             long termOffset,
@@ -222,7 +232,7 @@ namespace Spreads.IPC.Logbuffer
 
             return Pack(termId, resultingOffset);
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetAndAddRawTail(int alignedLength)
         {
             return _metaDataBuffer.InterlockedAddInt64(LogBufferDescriptor.TERM_TAIL_COUNTER_OFFSET, alignedLength);

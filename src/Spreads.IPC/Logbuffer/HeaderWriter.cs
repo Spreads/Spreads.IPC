@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+using System.Runtime.CompilerServices;
 using Spreads.Buffers;
 using Spreads.IPC.Protocol;
 
@@ -29,6 +30,7 @@ namespace Spreads.IPC.Logbuffer
         /// <param name="offset">offset at which the header should be written.</param>
         /// <param name="length">length of the fragment including the header.</param>
         /// <param name="termId">termId of the current term buffer.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Write(DirectBuffer termBuffer, int offset, int length, int termId)
         {
             var dataHeader = _defaultHeader; // copy struct by value

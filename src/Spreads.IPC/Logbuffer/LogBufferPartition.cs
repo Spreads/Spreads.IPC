@@ -11,7 +11,7 @@ namespace Spreads.IPC.Logbuffer
     /// <summary>
     /// Log buffer implementation containing common functionality for dealing with log partition terms.
     /// </summary>
-    public sealed class LogBufferPartition
+    public struct LogBufferPartition
     {
         private readonly DirectBuffer _termBuffer;
         private readonly DirectBuffer _metaDataBuffer;

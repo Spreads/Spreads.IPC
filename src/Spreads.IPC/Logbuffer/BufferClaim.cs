@@ -5,6 +5,7 @@
 using Spreads.Buffers;
 using Spreads.IPC.Protocol;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Spreads.IPC.Logbuffer
 {
@@ -30,37 +31,53 @@ namespace Spreads.IPC.Logbuffer
         /// <param name="length"> length of the underlying claimed region including space for the header. </param>
         public BufferClaim(DirectBuffer buffer, int offset, int length)
         {
-            _buffer = new DirectBuffer(length, buffer.Data + offset);
+            _buffer = DirectBuffer.CreateWithoutChecks(length, buffer.Data + offset);
         }
 
         /// <summary>
         /// The referenced buffer to be used.
         /// </summary>
         /// <returns> the referenced buffer to be used.. </returns>
-        public DirectBuffer Buffer => _buffer;
+        public DirectBuffer Buffer
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _buffer; }
+        }
 
         /// <summary>
         /// The offset in the buffer at which the claimed range begins.
         /// </summary>
         /// <returns> offset in the buffer at which the range begins. </returns>
-        public int Offset => DataHeaderFlyweight.HEADER_LENGTH;
+        public int Offset
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return DataHeaderFlyweight.HEADER_LENGTH; }
+        }
 
-        internal IntPtr Data => _buffer.Data + DataHeaderFlyweight.HEADER_LENGTH;
+        internal IntPtr Data
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _buffer.Data + DataHeaderFlyweight.HEADER_LENGTH; }
+        }
 
         public int Length
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { checked { return (int)_buffer.Length - DataHeaderFlyweight.HEADER_LENGTH; } }
         }
 
         public long ReservedValue
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _buffer.ReadInt64(DataHeaderFlyweight.RESERVED_VALUE_OFFSET); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { _buffer.WriteInt64(DataHeaderFlyweight.RESERVED_VALUE_OFFSET, value); }
         }
 
         /// <summary>
         /// Commit the message to the log buffer so that is it available to subscribers.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Commit()
         {
             checked

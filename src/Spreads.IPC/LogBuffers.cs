@@ -25,7 +25,7 @@ namespace Spreads.IPC
             try
             {
                 long logLength = LogBufferDescriptor.PARTITION_COUNT *
-                                 (LogBufferDescriptor.TERM_META_DATA_LENGTH + termLength) +
+                                 (LogBufferDescriptor.TERM_META_DATA_LENGTH + (long)termLength) +
                                  LogBufferDescriptor.LOG_META_DATA_LENGTH;
                 termLength = LogBufferDescriptor.ComputeTermLength(logLength);
                 LogBufferDescriptor.CheckTermLength(termLength);

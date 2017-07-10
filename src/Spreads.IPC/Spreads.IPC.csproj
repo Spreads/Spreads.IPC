@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Spreads.Core" Version="0.8.0-build1706230623" />
+        <PackageReference Include="Spreads.Core" Version="0.8.0-build1707102317" />
     </ItemGroup>
 
     <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

@@ -5,6 +5,7 @@
 using Spreads.Buffers;
 using Spreads.IPC.Protocol;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Spreads.IPC.Logbuffer
 {
@@ -93,7 +94,7 @@ namespace Spreads.IPC.Logbuffer
          * @param capacity of the log buffer.
          * @return the maximum supported length for a message.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeMaxMessageLength(int capacity)
         {
             return capacity / 8;
@@ -105,7 +106,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which the frame begins.
          * @return the offset at which the length field begins.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LengthOffset(int termOffset)
         {
             return termOffset;
@@ -117,7 +118,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which the frame begins.
          * @return the offset at which the version field begins.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int VersionOffset(int termOffset)
         {
             return termOffset + VERSION_OFFSET;
@@ -129,7 +130,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which the frame begins.
          * @return the offset at which the flags field begins.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FlagsOffset(int termOffset)
         {
             return termOffset + FLAGS_OFFSET;
@@ -141,7 +142,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which the frame begins.
          * @return the offset at which the type field begins.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int TypeOffset(int termOffset)
         {
             return termOffset + TYPE_OFFSET;
@@ -153,7 +154,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which the frame begins.
          * @return the offset at which the term offset field begins.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int TermOffsetOffset(int termOffset)
         {
             return termOffset + TERM_OFFSET;
@@ -165,7 +166,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which the frame begins.
          * @return the offset at which the term id field begins.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int TermIdOffset(int termOffset)
         {
             return termOffset + TERM_ID_OFFSET;
@@ -178,7 +179,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @return the value of the frame type header.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FrameVersion(DirectBuffer buffer, int termOffset)
         {
             return buffer.ReadByte(VersionOffset(termOffset));
@@ -191,7 +192,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @return the value of the frame type header.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FrameType(DirectBuffer buffer, int termOffset)
         {
             return buffer.ReadInt16(TypeOffset(termOffset)) & 0xFFFF;
@@ -204,7 +205,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @param type       type value for the frame.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FrameType(DirectBuffer buffer, int termOffset, int type)
         {
             buffer.WriteInt16(TypeOffset(termOffset), (short)type);
@@ -217,7 +218,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @return true if the frame is a padding frame otherwise false.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPaddingFrame(DirectBuffer buffer, int termOffset)
         {
             var type = buffer.ReadInt16(TypeOffset(termOffset));
@@ -231,7 +232,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @return the value for the frame length.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FrameLength(DirectBuffer buffer, int termOffset)
         {
             return buffer.ReadInt32(termOffset);
@@ -244,7 +245,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @return the value for the frame length.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FrameLengthVolatile(DirectBuffer buffer, int termOffset)
         {
             var frameLength = buffer.VolatileReadInt32(termOffset);
@@ -260,6 +261,7 @@ namespace Spreads.IPC.Logbuffer
          */
 
         [Obsolete("Inline manually, this adds nothing")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FrameLengthOrdered(DirectBuffer buffer, int termOffset, int frameLength)
         {
             buffer.VolatileWriteInt32(termOffset, frameLength);
@@ -272,7 +274,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @param flags      value for the frame.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FrameFlags(DirectBuffer buffer, int termOffset, byte flags)
         {
             buffer.WriteByte(FlagsOffset(termOffset), flags);
@@ -284,7 +286,7 @@ namespace Spreads.IPC.Logbuffer
          * @param buffer     containing the frame.
          * @param termOffset at which a frame begins.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FrameTermOffset(DirectBuffer buffer, int termOffset)
         {
             buffer.WriteInt32(TermOffsetOffset(termOffset), termOffset);
@@ -297,7 +299,7 @@ namespace Spreads.IPC.Logbuffer
          * @param termOffset at which a frame begins.
          * @param termId     value for the frame.
          */
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FrameTermId(DirectBuffer buffer, int termOffset, int termId)
         {
             buffer.WriteInt32(TermIdOffset(termOffset), termId);
