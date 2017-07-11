@@ -33,8 +33,7 @@ namespace Spreads.IPC.Logbuffer
     ///  +----------------------------+
     /// </pre>
     /// </summary>
-
-    public static class LogBufferDescriptor
+    internal static class LogBufferDescriptor
     {
         /**
          * The number of partitions the log is divided into with pairs of term and term meta data buffers.

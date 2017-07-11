@@ -8,9 +8,9 @@ using Spreads.Utils;
 
 namespace Spreads.IPC.Logbuffer
 {
-    public delegate void GapHandler(int termId, DirectBuffer buffer, int offset, int length);
+    internal delegate void GapHandler(int termId, DirectBuffer buffer, int offset, int length);
 
-    public class TermGapScanner
+    internal class TermGapScanner
     {
         private static int ALIGNED_HEADER_LENGTH = BitUtil.Align(DataHeaderFlyweight.HEADER_LENGTH, FrameDescriptor.FRAME_ALIGNMENT);
 

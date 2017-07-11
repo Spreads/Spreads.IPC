@@ -10,7 +10,7 @@ using System.Text;
 namespace Spreads.IPC.Protocol
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = DataHeaderFlyweight.HEADER_LENGTH)]
-    public struct DataHeader
+    internal struct DataHeader
     {
         public Header Header;
         public int TermOffset;
@@ -26,7 +26,7 @@ namespace Spreads.IPC.Protocol
  * <a href="https://github.com/real-logic/Aeron/wiki/Protocol-Specification#data-frame">Data Frame</a>
  */
 
-    public struct DataHeaderFlyweight
+    internal struct DataHeaderFlyweight
     {
         private readonly DirectBuffer _buffer;
         public HeaderFlyweight HeaderFlyweight;

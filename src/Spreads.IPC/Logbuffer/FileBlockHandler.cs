@@ -6,5 +6,5 @@ using System.IO;
 
 namespace Spreads.IPC.Logbuffer
 {
-    public delegate void FileBlockHandler(FileStream fileChannel, long offset, int length, int sessionId, int termId);
+    internal delegate void FileBlockHandler(FileStream fileChannel, long offset, int length, int sessionId, int termId);
 }

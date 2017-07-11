@@ -7,7 +7,7 @@ using Spreads.Utils;
 
 namespace Spreads.IPC.Logbuffer
 {
-    public static class LogBufferUnblocker
+    internal static class LogBufferUnblocker
     {
         /// <summary>
         /// Attempt to unblock a log buffer at given position

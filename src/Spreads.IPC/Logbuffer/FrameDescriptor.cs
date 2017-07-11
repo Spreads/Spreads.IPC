@@ -36,7 +36,7 @@ namespace Spreads.IPC.Logbuffer
     /// The (B)egin and (E)nd flags are used for message fragmentation. R is for reserved bit.
     /// Both are set for a message that does not span frames.
     /// </summary>
-    public static class FrameDescriptor
+    internal static class FrameDescriptor
     {
         /**
          * Alignment as a multiple of bytes for each frame. The length field will store the unaligned length in bytes.

@@ -6,10 +6,10 @@ using Spreads.Buffers;
 
 namespace Spreads.IPC.Logbuffer
 {
-    public delegate ControlledFragmentHandlerAction ControlledFragmentHandler(DirectBuffer buffer,
+    internal delegate ControlledFragmentHandlerAction ControlledFragmentHandler(DirectBuffer buffer,
         int offset, int length, Header header);
 
-    public enum ControlledFragmentHandlerAction
+    internal enum ControlledFragmentHandlerAction
     {
         /// <summary>
         /// Abort the current polling operation and do not advance the position for this fragment.

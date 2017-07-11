@@ -6,5 +6,5 @@ using Spreads.Buffers;
 
 namespace Spreads.IPC.Logbuffer
 {
-    public delegate void FragmentHandler(DirectBuffer buffer, int offset, int length, Header header);
+    internal delegate void FragmentHandler(DirectBuffer buffer, int offset, int length, Header header);
 }

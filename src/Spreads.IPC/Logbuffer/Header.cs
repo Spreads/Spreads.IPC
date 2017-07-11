@@ -9,7 +9,7 @@ using Spreads.Utils;
 
 namespace Spreads.IPC.Logbuffer
 {
-    public struct Header
+    internal struct Header
     {
         private readonly int _positionBitsToShift;
         private int _initialTermId;

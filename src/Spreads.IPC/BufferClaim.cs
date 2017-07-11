@@ -7,7 +7,7 @@ using Spreads.IPC.Protocol;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Spreads.IPC.Logbuffer
+namespace Spreads.IPC
 {
     /// <summary>
     /// Represents a claimed range in a buffer to be used for recording a message without copy semantics for later commit.

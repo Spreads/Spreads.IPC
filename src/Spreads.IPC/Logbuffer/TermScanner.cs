@@ -15,7 +15,7 @@ namespace Spreads.IPC.Logbuffer
      * This can be used to concurrently read a term buffer which is being appended to.
      */
 
-    public class TermScanner
+    internal class TermScanner
     {
         /**
          * Scan the term buffer for availability of new messages from a given offset up to a maxLength of bytes.

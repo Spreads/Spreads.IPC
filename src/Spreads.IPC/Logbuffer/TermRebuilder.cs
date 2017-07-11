@@ -9,7 +9,7 @@ namespace Spreads.IPC.Logbuffer
     /// <summary>
     /// Rebuild a term buffer based on incoming frames that can be out-of-order.
     /// </summary>
-    public static class TermRebuilder
+    internal static class TermRebuilder
     {
         /// <summary>
         /// Insert a packet of frames into the log at the appropriate offset as indicated by the term offset header.

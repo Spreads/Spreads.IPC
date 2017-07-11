@@ -7,7 +7,7 @@ using Spreads.IPC.Protocol;
 
 namespace Spreads.IPC.Logbuffer
 {
-    public enum TermUnblockerStatus
+    internal enum TermUnblockerStatus
     {
         /// <summary>
         /// No action has been taken during operation.
@@ -25,7 +25,7 @@ namespace Spreads.IPC.Logbuffer
         UNBLOCKED_TO_END,
     }
 
-    public class TermUnblocker
+    internal class TermUnblocker
     {
         /// <summary>
         /// Attempt to unblock the current term at the current offset.

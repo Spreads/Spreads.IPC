@@ -13,7 +13,7 @@ namespace Spreads.IPC
     /// Takes a log file name and maps the file into memory and wraps it with <seealso cref="DirectBuffer"/>s as appropriate.
     /// </summary>
     /// <seealso> cref="LogBufferDescriptor" </seealso>
-    public class LogBuffers : IDisposable
+    internal class LogBuffers : IDisposable
     {
         private readonly int _termLength;
         private DirectFile _df;

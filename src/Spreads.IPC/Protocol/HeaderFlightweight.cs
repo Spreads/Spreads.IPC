@@ -9,7 +9,7 @@ namespace Spreads.IPC.Protocol
 {
 
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4)]
-    public struct VersionFlagsType
+    internal struct VersionFlagsType
     {
         public byte Version;
         public byte Flags;
@@ -17,7 +17,7 @@ namespace Spreads.IPC.Protocol
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
-    public struct Header
+    internal struct Header
     {
         [FieldOffset(0)]
         public int FrameLength;
@@ -46,7 +46,7 @@ namespace Spreads.IPC.Protocol
     ///* |                       Depends on Type...
     ///*
     /// </summary>
-    public struct HeaderFlyweight
+    internal struct HeaderFlyweight
     {
         private readonly DirectBuffer _buffer;
         public static byte[] EMPTY_BUFFER = new byte[0];

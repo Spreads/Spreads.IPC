@@ -9,5 +9,5 @@ namespace Spreads.IPC.Logbuffer
     /// <summary>
     /// Function for handling a block of message fragments scanned from the log.
     /// </summary>
-    public delegate void BlockHandler(DirectBuffer buffer, int offset, int length, int sessionId, int termId);
+    internal delegate void BlockHandler(DirectBuffer buffer, int offset, int length, int sessionId, int termId);
 }

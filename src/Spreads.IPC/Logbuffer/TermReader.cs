@@ -16,7 +16,7 @@ namespace Spreads.IPC.Logbuffer
     /// <b>Note:</b> Reading from the term is thread safe, but each thread needs its own instance of this class.
     /// </para>
     /// </summary>
-    public static class TermReader
+    internal static class TermReader
     {
         /// <summary>
         /// Reads data from a term in a log buffer.

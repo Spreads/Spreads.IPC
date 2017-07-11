@@ -10,7 +10,7 @@ namespace Spreads.IPC.Logbuffer
     /// <summary>
     /// Scan a term buffer for a block of messages including padding. The block must include complete messages.
     /// </summary>
-    public static class TermBlockScanner
+    internal static class TermBlockScanner
     {
         /// <summary>
         /// Scan a term buffer for a block of messages from and offset up to a limit.

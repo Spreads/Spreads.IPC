@@ -24,8 +24,7 @@ namespace Spreads.IPC.Logbuffer
     /// A message of type <seealso cref="FrameDescriptor#PADDING_FRAME_TYPE"/> is appended at the end of the buffer if claimed
     /// space is not sufficiently large to accommodate the message about to be written.
     /// </summary>
-
-    public struct TermAppender
+    internal struct TermAppender
     {
         private readonly DirectBuffer _termBuffer;
         private readonly DirectBuffer _metaDataBuffer;
