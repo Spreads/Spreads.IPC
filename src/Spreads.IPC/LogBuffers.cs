@@ -71,13 +71,20 @@ namespace Spreads.IPC
 
         public DirectFile DirectFile => _df;
 
-        public void Dispose()
+        public void Dispose(bool disposing)
         {
             _df.Dispose();
-            //foreach (var buffer in _buffers)
-            //{
-            //    buffer.Dispose();
-            //}
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~LogBuffers()
+        {
+            Dispose(false);
         }
 
         public int TermLength => _termLength;

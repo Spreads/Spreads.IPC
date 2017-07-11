@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Spreads.Buffers;
+using Spreads.IPC;
+using Spreads.Utils;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Spreads.Buffers;
-using Spreads.IPC;
 
 namespace IPCThroughput
 {
@@ -18,17 +19,21 @@ namespace IPCThroughput
         {
             using (Process p = Process.GetCurrentProcess())
             {
-                p.PriorityClass = ProcessPriorityClass.High;
+                p.PriorityClass = ProcessPriorityClass.Normal;
             }
 
             var subscriber = new Subscriber();
             var subscriberThread = new Thread(subscriber.Run) { Name = "subscriber" };
             var publisherThread = new Thread(new Publisher().Run) { Name = "publisher" };
+            var publisherThread2 = new Thread(new Publisher().Run) { Name = "publisher2" };
+            var publisherThread3 = new Thread(new Publisher().Run) { Name = "publisher3" };
             var rateReporterThread = new Thread(new RateReporter(subscriber).Run) { Name = "rate-reporter" };
 
             rateReporterThread.Start();
             subscriberThread.Start();
             publisherThread.Start();
+            //publisherThread2.Start();
+            //publisherThread3.Start();
 
             Console.WriteLine("Press any key to stop...");
             Console.Read();
@@ -37,6 +42,8 @@ namespace IPCThroughput
 
             subscriberThread.Join();
             publisherThread.Join();
+            publisherThread2.Join();
+            publisherThread3.Join();
             rateReporterThread.Join();
         }
 
@@ -62,7 +69,8 @@ namespace IPCThroughput
                     var newTotalBytes = Subscriber.TotalBytes();
                     var duration = _stopwatch.ElapsedMilliseconds;
                     var bytesTransferred = newTotalBytes - lastTotalBytes;
-                    Console.WriteLine($"Duration {duration:N0}ms - {bytesTransferred / MessageLength:N0} messages - {bytesTransferred:N0} bytes, GC0 {GC.CollectionCount(0)}, GC1 {GC.CollectionCount(1)}, GC2 {GC.CollectionCount(2)}");
+                    Console.WriteLine(
+                        $"Duration {duration:N0}ms - {bytesTransferred / MessageLength:N0} messages - {bytesTransferred:N0} bytes, GC0 {GC.CollectionCount(0)}, GC1 {GC.CollectionCount(1)}, GC2 {GC.CollectionCount(2)}");
 
                     _stopwatch.Restart();
                     lastTotalBytes = newTotalBytes;
@@ -79,7 +87,7 @@ namespace IPCThroughput
                 _log = new AppendLog("IPC_throughput", 500);
             }
 
-            public void Run()
+            public unsafe void Run()
             {
                 long totalMessageCount = 0;
                 var handle = Marshal.AllocHGlobal(MessageLength);
@@ -89,10 +97,8 @@ namespace IPCThroughput
                     for (var i = 0; i < BurstLength; i++)
                     {
                         _log.Claim(MessageLength, out var claim);
-                        claim.Buffer.WriteDouble(0, 1); //.WriteBytes(0, source, 0, MessageLength);
-                        //claim.Buffer.WriteDouble(8, 2); //.WriteBytes(0, source, 0, MessageLength);
-                        //claim.Buffer.WriteDouble(16, 3); //.WriteBytes(0, source, 0, MessageLength);
-                        //claim.Buffer.WriteDouble(24, 4); //.WriteBytes(0, source, 0, MessageLength);
+                        ByteUtil.VectorizedCopy((byte*)(claim.Data), (byte*)(source.Data), (uint)MessageLength);
+                        //claim.Buffer.WriteBytes(claim.Offset, source, 0, MessageLength);
                         claim.Commit();
                         ++totalMessageCount;
                     }

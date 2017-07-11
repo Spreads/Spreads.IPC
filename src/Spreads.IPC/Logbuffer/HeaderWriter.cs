@@ -14,7 +14,7 @@ namespace Spreads.IPC.Logbuffer
     /// This class is designed to be thread safe to be used across multiple producers and makes the header
     /// visible in the correct order for consumers.
     /// </summary>
-    public sealed class HeaderWriter
+    public struct HeaderWriter
     {
         private readonly DataHeader _defaultHeader;
 
@@ -33,12 +33,17 @@ namespace Spreads.IPC.Logbuffer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Write(DirectBuffer termBuffer, int offset, int length, int termId)
         {
-            var dataHeader = _defaultHeader; // copy struct by value
-            dataHeader.Header.FrameLength = -length;
-            dataHeader.TermOffset = offset;
-            dataHeader.TermID = termId;
+            // NB in Spreads implementation negative length is already written
+            // using Interlocked.Exchange, so no need for additional barriers
 
-            *(DataHeader*)(termBuffer.Data + offset + HeaderFlyweight.FRAME_LENGTH_FIELD_OFFSET) = dataHeader;
+            var ptr = (DataHeader*)(termBuffer.Data + offset + HeaderFlyweight.FRAME_LENGTH_FIELD_OFFSET);
+
+            ptr->Header.VersionFlagsType = _defaultHeader.Header.VersionFlagsType;
+            ptr->TermOffset = offset;
+            ptr->TermID = termId;
+            ptr->SessionID = _defaultHeader.SessionID;
+            ptr->StreamID = _defaultHeader.StreamID;
+
         }
     }
 }

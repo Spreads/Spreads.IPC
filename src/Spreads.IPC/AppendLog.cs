@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Spreads.Buffers;
 
 namespace Spreads.IPC
 {
@@ -25,9 +26,9 @@ namespace Spreads.IPC
 
     public interface IAppendLog : IDisposable
     {
-        void Append<T>(T message);
-
         long Claim(int length, out BufferClaim claim);
+
+        void StartPolling();
 
         event OnAppendHandler OnAppend;
     }
@@ -117,7 +118,7 @@ namespace Spreads.IPC
                                 while (!_cts.IsCancellationRequested)
                                 {
                                     var fragments = Poll();
-                                    if (fragments > 0)
+                                    if (fragments > 0 || sw.NextSpinWillYield)
                                     {
                                         sw.Reset();
                                     }
@@ -236,7 +237,7 @@ namespace Spreads.IPC
             var termBuffer = _logBuffers.Buffers[subscriberIndex];
 
             // ,ErrorHandler errorHandler //OnError
-            long outcome = TermReader.Read(termBuffer, termOffset, OnAppend, 10);
+            long outcome = TermReader.Read(termBuffer, termOffset, OnAppend, 256);
 
             UpdatePosition(termOffset, TermReader.Offset(outcome));
             return outcome & 0xFFFFFFFFL;
@@ -253,18 +254,18 @@ namespace Spreads.IPC
             _subscriberPosition = _subscriberPosition + (offsetAfter - offsetBefore);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append<T>(T message)
-        {
-            throw new NotImplementedException();
-            //MemoryStream stream;
-            //var sizeOf = BinarySerializer.SizeOf<T>(message, out stream);
-            //BufferClaim claim;
-            //Claim(sizeOf, out claim);
-            //var buffer = claim.Buffer;
-            //BinarySerializer.Write<T>(message, ref buffer, (uint)claim.Offset, stream);
-            //claim.Commit();
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public void Append<T>(T message)
+        //{
+        //    throw new NotImplementedException();
+        //    //MemoryStream stream;
+        //    //var sizeOf = BinarySerializer.SizeOf<T>(message, out stream);
+        //    //BufferClaim claim;
+        //    //Claim(sizeOf, out claim);
+        //    //var buffer = claim.Buffer;
+        //    //BinarySerializer.Write<T>(message, ref buffer, (uint)claim.Offset, stream);
+        //    //claim.Commit();
+        //}
 
         /// <summary>
         /// Called on a thread pool in background when a term appender returns TRIPPED result

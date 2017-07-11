@@ -12,7 +12,7 @@ namespace Spreads.IPC.Logbuffer
     /// <summary>
     /// Represents a claimed range in a buffer to be used for recording a message without copy semantics for later commit.
     /// <para>
-    /// The claimed space is in <seealso cref="Buffer"/> between <seealso cref="Offset"/> and <seealso cref="Offset"/> + <seealso cref="Length"/>.
+    /// The claimed space is in <seealso cref="ClaimBuffer"/> between <seealso cref="Offset"/> and <seealso cref="Offset"/> + <seealso cref="Length"/>.
     /// When the buffer is filled with message data, use <seealso cref="Commit()"/> to make it available to subscribers.
     /// </para>
     /// <para>
@@ -21,7 +21,7 @@ namespace Spreads.IPC.Logbuffer
     /// </summary>
     public struct BufferClaim
     {
-        private readonly DirectBuffer _buffer;
+        private readonly DirectBuffer _claimBuffer;
 
         /// <summary>
         /// Wrap a region of an underlying log buffer so can can represent a claimed space for use by a publisher.
@@ -31,47 +31,59 @@ namespace Spreads.IPC.Logbuffer
         /// <param name="length"> length of the underlying claimed region including space for the header. </param>
         public BufferClaim(DirectBuffer buffer, int offset, int length)
         {
-            _buffer = DirectBuffer.CreateWithoutChecks(length, buffer.Data + offset);
+            _claimBuffer = DirectBuffer.CreateWithoutChecks(length, buffer.Data + offset);
         }
 
         /// <summary>
-        /// The referenced buffer to be used.
+        /// The referenced buffer to be used together with header.
         /// </summary>
         /// <returns> the referenced buffer to be used.. </returns>
+        internal DirectBuffer ClaimBuffer
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _claimBuffer; }
+        }
+
+        /// <summary>
+        /// Data buffer.
+        /// </summary>
         public DirectBuffer Buffer
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _buffer; }
+            get { return DirectBuffer.CreateWithoutChecks(Length, Data); }
         }
 
         /// <summary>
         /// The offset in the buffer at which the claimed range begins.
         /// </summary>
         /// <returns> offset in the buffer at which the range begins. </returns>
-        public int Offset
+        internal int Offset
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return DataHeaderFlyweight.HEADER_LENGTH; }
         }
 
-        internal IntPtr Data
+        /// <summary>
+        /// Pointer to the beginning of data span.
+        /// </summary>
+        public IntPtr Data
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _buffer.Data + DataHeaderFlyweight.HEADER_LENGTH; }
+            get { return _claimBuffer.Data + DataHeaderFlyweight.HEADER_LENGTH; }
         }
 
         public int Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { checked { return (int)_buffer.Length - DataHeaderFlyweight.HEADER_LENGTH; } }
+            get { checked { return (int)_claimBuffer.Length - DataHeaderFlyweight.HEADER_LENGTH; } }
         }
 
         public long ReservedValue
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _buffer.ReadInt64(DataHeaderFlyweight.RESERVED_VALUE_OFFSET); }
+            get { return _claimBuffer.ReadInt64(DataHeaderFlyweight.RESERVED_VALUE_OFFSET); }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { _buffer.WriteInt64(DataHeaderFlyweight.RESERVED_VALUE_OFFSET, value); }
+            set { _claimBuffer.WriteInt64(DataHeaderFlyweight.RESERVED_VALUE_OFFSET, value); }
         }
 
         /// <summary>
@@ -82,8 +94,8 @@ namespace Spreads.IPC.Logbuffer
         {
             checked
             {
-                var frameLength = (int)_buffer.Length;
-                _buffer.VolatileWriteInt32(HeaderFlyweight.FRAME_LENGTH_FIELD_OFFSET, frameLength);
+                var frameLength = (int)_claimBuffer.Length;
+                _claimBuffer.VolatileWriteInt32(HeaderFlyweight.FRAME_LENGTH_FIELD_OFFSET, frameLength);
             }
         }
 
@@ -94,9 +106,9 @@ namespace Spreads.IPC.Logbuffer
         {
             checked
             {
-                var frameLength = (int)_buffer.Length;
-                _buffer.WriteInt16(HeaderFlyweight.TYPE_FIELD_OFFSET, (short)HeaderFlyweight.HDR_TYPE_PAD);
-                _buffer.VolatileWriteInt32(HeaderFlyweight.FRAME_LENGTH_FIELD_OFFSET, frameLength);
+                var frameLength = (int)_claimBuffer.Length;
+                _claimBuffer.WriteInt16(HeaderFlyweight.TYPE_FIELD_OFFSET, (short)HeaderFlyweight.HDR_TYPE_PAD);
+                _claimBuffer.VolatileWriteInt32(HeaderFlyweight.FRAME_LENGTH_FIELD_OFFSET, frameLength);
             }
         }
     }

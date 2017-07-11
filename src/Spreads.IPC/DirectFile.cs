@@ -2,15 +2,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+using Spreads.Buffers;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using Spreads.Buffers;
 
 namespace Spreads.IPC
 {
-    public struct DirectFile : IDisposable
+    public class DirectFile : IDisposable
     {
         private static long _counter;
         private static readonly object SyncRoot = new object();
@@ -75,17 +75,28 @@ namespace Spreads.IPC
             }
         }
 
-        public void Dispose()
+        public void Flush(bool flushToDisk = false)
+        {
+            _va.Flush();
+            if (flushToDisk) { _fileStream.Flush(true); }
+        }
+
+        public void Dispose(bool disposing)
         {
             _va.Dispose();
             _mmf.Dispose();
             _fileStream.Dispose();
         }
 
-        public void Flush(bool flushToDisk = false)
+        public void Dispose()
         {
-            _va.Flush();
-            if (flushToDisk) { _fileStream.Flush(true); }
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~DirectFile()
+        {
+            Dispose(false);
         }
 
         public long Capacity => _capacity;

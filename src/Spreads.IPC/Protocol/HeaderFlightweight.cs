@@ -7,12 +7,29 @@ using System.Runtime.InteropServices;
 
 namespace Spreads.IPC.Protocol
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 8)]
-    public struct Header
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4)]
+    public struct VersionFlagsType
     {
-        public int FrameLength;
         public byte Version;
         public byte Flags;
+        public short Type;
+    }
+
+    [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 8)]
+    public struct Header
+    {
+        [FieldOffset(0)]
+        public int FrameLength;
+
+        [FieldOffset(4)]
+        public VersionFlagsType VersionFlagsType;
+
+        [FieldOffset(4)]
+        public byte Version;
+        [FieldOffset(5)]
+        public byte Flags;
+        [FieldOffset(6)]
         public short Type;
     }
 

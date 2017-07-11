@@ -29,6 +29,7 @@ namespace Spreads.IPC.Logbuffer
     {
         private readonly DirectBuffer _termBuffer;
         private readonly DirectBuffer _metaDataBuffer;
+
         /**
          * The append operation tripped the end of the buffer and needs to rotate.
          */
@@ -48,14 +49,14 @@ namespace Spreads.IPC.Logbuffer
 
         public TermAppender(DirectBuffer termBuffer, DirectBuffer metaDataBuffer)
         {
-            this._termBuffer = termBuffer;
-            this._metaDataBuffer = metaDataBuffer;
+            _termBuffer = termBuffer;
+            _metaDataBuffer = metaDataBuffer;
         }
 
         public TermAppender(LogBufferPartition partition)
         {
-            this._termBuffer = partition.TermBuffer;
-            this._metaDataBuffer = partition.MetaDataBuffer;
+            _termBuffer = partition.TermBuffer;
+            _metaDataBuffer = partition.MetaDataBuffer;
         }
 
         public DirectBuffer TermBuffer
@@ -78,8 +79,9 @@ namespace Spreads.IPC.Logbuffer
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _metaDataBuffer.VolatileReadInt64(LogBufferDescriptor.TERM_TAIL_COUNTER_OFFSET); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _metaDataBuffer.VolatileWriteInt64(LogBufferDescriptor.TERM_TAIL_COUNTER_OFFSET, value); }
         }
-
 
 
         /// <summary>
@@ -118,10 +120,11 @@ namespace Spreads.IPC.Logbuffer
             int frameLength = length + DataHeaderFlyweight.HEADER_LENGTH;
             int alignedLength = BitUtil.Align(frameLength, FrameDescriptor.FRAME_ALIGNMENT);
 
-            DirectBuffer termBuffer = _termBuffer;
-            int termLength = (int)termBuffer.Length;
+            var termBuffer = _termBuffer;
+            int termLength = checked((int)termBuffer.Length);
             long resultingOffset;
             var spinCounter = 0;
+            var spinWait = new SpinWait();
             var rawTail = RawTailVolatile;
 
             while (true)
@@ -131,7 +134,7 @@ namespace Spreads.IPC.Logbuffer
 
                 if (resultingOffset > termLength)
                 {
-                    _metaDataBuffer.VolatileWriteInt64(LogBufferDescriptor.TERM_TAIL_COUNTER_OFFSET, rawTail + alignedLength);
+                    RawTailVolatile = rawTail + alignedLength;
                     resultingOffset = HandleEndOfLogCondition(termBuffer, termOffset, header, termLength, TermId(rawTail));
                     bufferClaim = default(BufferClaim);
                     break;
@@ -140,24 +143,31 @@ namespace Spreads.IPC.Logbuffer
                 // true if we are the first to claim space at current offset
                 if (0 ==
                     Interlocked.CompareExchange(
-                        ref *(int*)(new IntPtr(_termBuffer.Data.ToInt64() + termOffset)), -length, 0))
+                        ref *(int*)(new IntPtr(_termBuffer.Data.ToInt64() + termOffset)), -frameLength, 0))
                 {
                     // if a writer dies here, another writer will unblock below
-                    _metaDataBuffer.VolatileWriteInt64(LogBufferDescriptor.TERM_TAIL_COUNTER_OFFSET, rawTail + alignedLength);
-                    int offset = (int)termOffset;
+                    // NB no need for volatile write because it prevents only reordering
+                    // from abve it to below, but above it we have a full barrier due to Interlocked
+                    _metaDataBuffer.WriteInt64(LogBufferDescriptor.TERM_TAIL_COUNTER_OFFSET,
+                        rawTail + alignedLength);
+                    int offset = (int)Volatile.Read(ref termOffset);
                     header.Write(termBuffer, offset, frameLength, TermId(rawTail));
                     bufferClaim = new BufferClaim(termBuffer, offset, frameLength);
                     break;
                 }
 
+                spinWait.SpinOnce();
+
                 // spin, will re-read (volatile) current tail and try again
                 // single writer will always succeed on first try
                 var previousRawTail = rawTail;
                 rawTail = RawTailVolatile;
+
                 if (previousRawTail == rawTail)
                 {
                     // incrementing tail happens right next to interlocked -length write
                     // we should spin in case another writer has written -length but not yet incremented tail
+                    // but such situation should be very short-lived
                     spinCounter++;
                     if (spinCounter > 100)
                     {
@@ -169,6 +179,7 @@ namespace Spreads.IPC.Logbuffer
 
             return resultingOffset;
         }
+
 
         /**
          * Pack the values for termOffset and termId into a long for returning on the stack.
