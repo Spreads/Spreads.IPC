@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spreads.IPC.Tests", "test\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPCThroughput", "test\IPCThroughput\IPCThroughput.csproj", "{CAEF8DC5-39EE-4969-A99D-5139849A75F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UDPThroughput", "test\UDPThroughput\UDPThroughput.csproj", "{7404890E-F171-4D5E-901E-DD82DFA1385F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{CAEF8DC5-39EE-4969-A99D-5139849A75F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAEF8DC5-39EE-4969-A99D-5139849A75F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAEF8DC5-39EE-4969-A99D-5139849A75F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7404890E-F171-4D5E-901E-DD82DFA1385F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7404890E-F171-4D5E-901E-DD82DFA1385F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7404890E-F171-4D5E-901E-DD82DFA1385F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7404890E-F171-4D5E-901E-DD82DFA1385F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,5 +49,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F843DA10-D174-45C4-9996-C23008ED3A8A} = {ED8079DD-2B06-4030-9F0F-DC548F98E1C4}
 		{CAEF8DC5-39EE-4969-A99D-5139849A75F2} = {ED8079DD-2B06-4030-9F0F-DC548F98E1C4}
+		{7404890E-F171-4D5E-901E-DD82DFA1385F} = {ED8079DD-2B06-4030-9F0F-DC548F98E1C4}
 	EndGlobalSection
 EndGlobal

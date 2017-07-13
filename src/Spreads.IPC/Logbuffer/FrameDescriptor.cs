@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 using Spreads.Buffers;
-using Spreads.IPC.Protocol;
 using System;
 using System.Runtime.CompilerServices;
+using Spreads.IPC.Logbuffer.Protocol;
 
 namespace Spreads.IPC.Logbuffer
 {

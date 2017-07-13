@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 using Spreads.Buffers;
-using Spreads.IPC.Protocol;
+using Spreads.IPC.Logbuffer.Protocol;
 using Spreads.Utils;
 
 namespace Spreads.IPC.Logbuffer

@@ -4,7 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using Spreads.Buffers;
-using Spreads.IPC.Protocol;
+using Spreads.IPC.Logbuffer.Protocol;
 using Spreads.Utils;
 
 namespace Spreads.IPC.Logbuffer

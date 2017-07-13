@@ -32,8 +32,8 @@ namespace IPCThroughput
             rateReporterThread.Start();
             subscriberThread.Start();
             publisherThread.Start();
-            //publisherThread2.Start();
-            //publisherThread3.Start();
+            publisherThread2.Start();
+            publisherThread3.Start();
 
             Console.WriteLine("Press any key to stop...");
             Console.Read();

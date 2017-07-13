@@ -2,12 +2,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-using Spreads.Buffers;
-using Spreads.IPC.Logbuffer;
 using System;
 using System.IO;
+using Spreads.Buffers;
 
-namespace Spreads.IPC
+namespace Spreads.IPC.Logbuffer
 {
     /// <summary>
     /// Takes a log file name and maps the file into memory and wraps it with <seealso cref="DirectBuffer"/>s as appropriate.
@@ -21,7 +20,7 @@ namespace Spreads.IPC
         private readonly LogBufferPartition[] _partitions = new LogBufferPartition[LogBufferDescriptor.PARTITION_COUNT];
 
         public LogBuffers(string logFileName, int termLength = LogBufferDescriptor.TERM_MIN_LENGTH)
-        {
+        {            
             try
             {
                 long logLength = LogBufferDescriptor.PARTITION_COUNT *

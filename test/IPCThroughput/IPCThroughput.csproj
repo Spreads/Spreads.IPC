@@ -60,7 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Spreads.Core">
-      <Version>0.8.0-build1707110413</Version>
+      <Version>0.8.0-build1707131908</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
