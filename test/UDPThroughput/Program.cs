@@ -8,7 +8,7 @@ namespace UDPThroughput
 {
     public class IpcThroughput
     {
-        private static readonly int MessageLength = 1024;
+        private static readonly int MessageLength = 32;
 
         private static volatile bool running = true;
 
